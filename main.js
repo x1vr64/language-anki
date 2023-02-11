@@ -28,8 +28,12 @@ __export(main_exports, {
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
+var DEFAULT_SETTINGS = {
+  googleApiKey: "default"
+};
 var ObsidianLanguageAnkiPlugin = class extends import_obsidian.Plugin {
-  onload() {
+  async onload() {
+    await this.loadSettings();
     function isOnlyBulletPrefix(value) {
       return value.startsWith("- [") || value === "-";
     }
@@ -38,6 +42,10 @@ var ObsidianLanguageAnkiPlugin = class extends import_obsidian.Plugin {
       name: "Translate selected word",
       hotkeys: [{ modifiers: ["Mod", "Shift"], key: "a" }],
       editorCallback: (editor) => {
+        if (this.settings.googleApiKey === "default") {
+          new import_obsidian.Notice("Google api key not set");
+          return;
+        }
         const DELIMITER = " = ";
         const currentLine = editor.getCursor().line;
         const value = editor.getLine(currentLine);
@@ -50,21 +58,51 @@ var ObsidianLanguageAnkiPlugin = class extends import_obsidian.Plugin {
         this.translateWord(value).then((res) => editor.setLine(currentLine, `${value}${DELIMITER}${res}`));
       }
     });
+    this.addSettingTab(new AnkiSettingTab(this.app, this));
   }
   async translateWord(value) {
-    const url = `https://translate.google.com/translate_a/single?client=at&dt=t&dj=1`;
-    const body = this.buildBody(value);
+    const url = "https://translation.googleapis.com/language/translate/v2";
+    const body = {
+      "q": value,
+      "source": "en",
+      "target": "ru",
+      "format": "text"
+    };
     const response = await (0, import_obsidian.requestUrl)({
+      throw: false,
       method: "POST",
       url,
-      body,
-      contentType: "application/x-www-form-urlencoded;charset=utf-8"
+      body: JSON.stringify(body),
+      headers: {
+        "Authorization": `Bearer ${this.settings.googleApiKey}`,
+        "x-goog-user-project": "neat-striker-377509"
+      },
+      contentType: "application/json; charset=utf-8"
     });
-    console.log(response.status);
-    console.log(response);
-    return response.json["sentences"][0]["trans"];
+    if (response.status != 200) {
+      return JSON.stringify(response, null, 2);
+    }
+    return response.json["data"]["translations"][0]["translatedText"];
   }
-  buildBody(inputText) {
-    return "sl=en&tl=ru&q=" + encodeURIComponent(inputText);
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
+};
+var AnkiSettingTab = class extends import_obsidian.PluginSettingTab {
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+  display() {
+    const { containerEl } = this;
+    containerEl.empty();
+    containerEl.createEl("h2", { text: "Language Anki settings" });
+    new import_obsidian.Setting(containerEl).setName("Google api key").setDesc("It's a secret").addText((text) => text.setPlaceholder("Enter your secret").setValue(this.plugin.settings.googleApiKey).onChange(async (value) => {
+      this.plugin.settings.googleApiKey = value;
+      await this.plugin.saveSettings();
+    }));
   }
 };
