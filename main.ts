@@ -1,5 +1,4 @@
-import { Editor, Plugin } from 'obsidian';
-import { setCORS } from "google-translate-api-browser";
+import { Editor, Plugin, requestUrl } from 'obsidian';
 
 const DELIMITER = " = ";
 
@@ -38,8 +37,30 @@ export default class MyPlugin extends Plugin {
 
 	private async translateWord(value: string) {
 		console.log(`Send request to google api. Translate value: ${value}`)
-		const translate = setCORS("http://cors-anywhere.herokuapp.com/");
-		const {text} = await translate(value, {to: 'ru'});
-		return text
+		const url = [
+			`https://translate.google.com/translate_a/single`,
+			'?client=at',
+			'&dt=t',  // return sentences
+			// '&dt=rm', // add translit to sentences
+			'&dj=1',  // result as pretty json instead of deep nested arrays
+		].join('');
+		const body = this.buildBody(value);
+
+		const {sentences} = await requestUrl({
+			method: 'POST',
+			url: url,
+			body: body,
+			contentType: 'application/x-www-form-urlencoded;charset=utf-8'
+		}).json
+		return sentences[0]['trans']
+	}
+
+	protected buildBody(inputText: string) {
+		const params = {
+			sl: 'en',
+			tl: 'ru',
+			q: inputText,
+		};
+		return new URLSearchParams(params).toString();
 	}
 }
