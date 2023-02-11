@@ -1,6 +1,6 @@
 import { Editor, Plugin, requestUrl } from 'obsidian';
 
-export default class MyPlugin extends Plugin {
+export default class ObsidianLanguageAnkiPlugin extends Plugin {
 	onload() {
 		function isOnlyBulletPrefix(value: string) {
 			return value.trim().startsWith("- [") || value.trim() === "-";
