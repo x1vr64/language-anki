@@ -37,13 +37,15 @@ export default class ObsidianLanguageAnkiPlugin extends Plugin {
 			'&dj=1' // result as pretty json instead of deep nested arrays
 		;
 		const body = this.buildBody(value);
-		const {sentences} = await requestUrl({
+		const response = await requestUrl({
 			method: 'POST',
 			url: url,
 			body: body,
 			contentType: 'application/x-www-form-urlencoded;charset=utf-8'
-		}).json
-		return sentences[0]['trans']
+		})
+		console.log(response.status)
+		console.log(response)
+		return response.json['sentences'][0]['trans']
 	}
 
 	protected buildBody(inputText: string) {
