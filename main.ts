@@ -3,7 +3,7 @@ import { Editor, Plugin, requestUrl } from 'obsidian';
 export default class ObsidianLanguageAnkiPlugin extends Plugin {
 	onload() {
 		function isOnlyBulletPrefix(value: string) {
-			return value.trim().startsWith("- [") || value.trim() === "-";
+			return value.startsWith("- [") || value === "-";
 		}
 
 		this.addCommand({
@@ -14,17 +14,13 @@ export default class ObsidianLanguageAnkiPlugin extends Plugin {
 				const DELIMITER = " = ";
 				const currentLine = editor.getCursor().line;
 
-				// pick at most 30 character. We only need find delimiter
-				const value = editor.getLine(currentLine).substring(0, 30).trimEnd();
-				console.log(`Selected line ${currentLine}. Value: ${value}`)
+				const value = editor.getLine(currentLine);
 
 				if (value.length === 0 || isOnlyBulletPrefix(value)) {
-					console.log(`Empty line. Skip`)
 					return;
 				}
 
 				if (value.contains(DELIMITER)) {
-					console.log(`Line ${currentLine} contains delimiter:[${DELIMITER}]. Skip`)
 					return;
 				}
 
@@ -35,16 +31,12 @@ export default class ObsidianLanguageAnkiPlugin extends Plugin {
 	}
 
 	private async translateWord(value: string) {
-		console.log(`Send request to google api. Translate value: ${value}`)
-		const url = [
-			`https://translate.google.com/translate_a/single`,
-			'?client=at',
-			'&dt=t',  // return sentences
-			// '&dt=rm', // add translit to sentences
-			'&dj=1',  // result as pretty json instead of deep nested arrays
-		].join('');
+		const url = `https://translate.google.com/translate_a/single` +
+			'?client=at' +
+			'&dt=t' + // return sentences
+			'&dj=1' // result as pretty json instead of deep nested arrays
+		;
 		const body = this.buildBody(value);
-
 		const {sentences} = await requestUrl({
 			method: 'POST',
 			url: url,
@@ -55,11 +47,6 @@ export default class ObsidianLanguageAnkiPlugin extends Plugin {
 	}
 
 	protected buildBody(inputText: string) {
-		const params = {
-			sl: 'en',
-			tl: 'ru',
-			q: inputText,
-		};
-		return new URLSearchParams(params).toString();
+		return 'sl=en&tl=ru&q=' + encodeURIComponent(inputText);
 	}
 }
