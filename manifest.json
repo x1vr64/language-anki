@@ -1,7 +1,7 @@
 {
 	"id": "x1vr64-obsidian-language-anki",
 	"name": "Language Anki",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"minAppVersion": "0.15.0",
 	"description": "Help create word data set for language study",
 	"author": "x1vr64",

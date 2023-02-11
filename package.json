@@ -1,6 +1,6 @@
 {
 	"name": "x1vr64-obsidian-language-anki",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Help create word data set for language study",
 	"main": "main.js",
 	"scripts": {
