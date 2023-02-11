@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "x1vr64-obsidian-language-anki",
+	"name": "Language Anki",
+	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
+	"description": "Help create word data set for language study",
+	"author": "x1vr64",
+	"authorUrl": "https://github.com/x1vr64",
 	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
 }
