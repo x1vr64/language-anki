@@ -1,18 +1,17 @@
 import { Editor, Plugin, requestUrl } from 'obsidian';
 
-const DELIMITER = " = ";
-
-function isOnlyBulletPrefix(value: string) {
-	return value.trim().startsWith("- [") || value.trim() === "-";
-}
-
 export default class MyPlugin extends Plugin {
 	onload() {
+		function isOnlyBulletPrefix(value: string) {
+			return value.trim().startsWith("- [") || value.trim() === "-";
+		}
+
 		this.addCommand({
 			id: "translate-word",
 			name: "Translate selected word",
 			hotkeys: [{modifiers: ["Mod", "Shift"], key: "a"}],
 			editorCallback: (editor: Editor) => {
+				const DELIMITER = " = ";
 				const currentLine = editor.getCursor().line;
 
 				// pick at most 30 character. We only need find delimiter
